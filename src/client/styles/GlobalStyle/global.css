@@ -1,0 +1,389 @@
+ul {
+  list-style: none;
+}
+figure,
+ul {
+  padding: 0px;
+  margin: 0px;
+}
+/**
+  * 1. Correct the line height in all browsers.
+  * 2. Prevent adjustments of font size after orientation changes in iOS.
+  */
+
+html {
+  -webkit-text-size-adjust: 100%; /* 2 */
+  scroll-behavior: smooth;
+}
+
+/**
+  * Remove the margin in all browsers.
+  */
+
+html,
+body {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.25;
+  color: #333;
+  background-color: rgba(22, 34, 47, 0.99);
+  -webkit-tap-highlight-color: transparent;
+  @media screen and (max-width: 370px) {
+    font-size: 14px;
+  }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  font-size: inherit;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+*::after,
+*::before {
+  box-sizing: border-box;
+}
+
+/**
+  * Remove the gray background on active links in IE 10.
+  */
+
+a {
+  background-color: transparent;
+  text-decoration: none;
+}
+
+b,
+strong {
+  font-weight: bolder;
+}
+
+p {
+  margin: 0;
+}
+
+img {
+  border-style: none;
+}
+
+img::selection {
+  background: none;
+}
+
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit; /* 1 */
+  font-size: 100%; /* 1 */
+  line-height: 1.15; /* 1 */
+  margin: 0; /* 2 */
+}
+
+/**
+  * Show the overflow in IE.
+  * 1. Show the overflow in Edge.
+  */
+
+button,
+input {
+  /* 1 */
+  overflow: visible;
+}
+
+/**
+  * Remove the inheritance of text transform in Edge, Firefox, and IE.
+  * 1. Remove the inheritance of text transform in Firefox.
+  */
+
+button,
+select {
+  /* 1 */
+  text-transform: none;
+}
+
+/**
+  * Correct the inability to style clickable types in iOS and Safari.
+  */
+
+/**
+  * Remove the default vertical scrollbar in IE 10+.
+  */
+
+textarea {
+  overflow: auto;
+}
+
+::-webkit-file-upload-button {
+  -webkit-appearance: button;
+  font: inherit;
+}
+
+input {
+  -webkit-appearance: none;
+}
+
+input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px #fff inset;
+}
+
+a,
+button {
+  cursor: pointer;
+}
+
+/* Common class names to be added below */
+.Ell {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dB {
+  display: block;
+}
+.dN {
+  display: none;
+}
+.dG {
+  display: grid;
+}
+.dIB {
+  display: inline-block;
+}
+.dIh {
+  display: inherit;
+}
+.dF {
+  display: flex;
+}
+.dIF {
+  display: inline-flex;
+}
+.dFA {
+  display: flex;
+  align-items: center;
+}
+.f1 {
+  flex: 1;
+}
+.fdC {
+  flex-direction: column;
+}
+.fdR {
+  flex-direction: row;
+}
+.fdrR {
+  flex-direction: row-reverse;
+}
+.fs0 {
+  flex-shrink: 0;
+}
+.jcC {
+  justify-content: center;
+}
+.jcSA {
+  justify-content: space-around;
+}
+.jcSB {
+  justify-content: space-between;
+}
+.jcFE {
+  justify-content: flex-end;
+}
+.aiFE {
+  align-items: flex-end;
+}
+.aiFS {
+  align-items: flex-start;
+}
+.aiB {
+  align-items: baseline;
+}
+.boN {
+  border: none;
+}
+.baW {
+  background: white;
+}
+.br50 {
+  border-radius: 50%;
+}
+.cD {
+  cursor: default;
+}
+.cP {
+  cursor: pointer;
+}
+.fwM {
+  font-weight: 500;
+}
+.fwB {
+  font-weight: bold;
+}
+.fwN {
+  font-weight: normal;
+}
+.fwW {
+  flex-wrap: wrap;
+}
+.fwNW {
+  flex-wrap: nowrap;
+}
+.h0 {
+  height: 0;
+}
+.h100 {
+  height: 100%;
+}
+.h100VH {
+  height: 100vh;
+}
+.h80VH {
+  height: 80vh;
+}
+.h60VH {
+  height: 60vh;
+}
+.h50VH {
+  height: 50vh;
+}
+.hA {
+  height: auto;
+}
+.m0 {
+  margin: 0;
+}
+.mA {
+  margin: auto;
+}
+.o0 {
+  opacity: 0;
+}
+.o1 {
+  opacity: 1;
+}
+.ofC {
+  object-fit: cover;
+}
+.oH {
+  overflow: hidden;
+}
+.oxA {
+  overflow-x: auto;
+}
+.oxH {
+  overflow-x: hidden;
+}
+.hideScrollBar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hideScrollBar::-webkit-scrollbar {
+  display: none;
+}
+.oyA {
+  overflow-y: auto;
+}
+.oyH {
+  overflow-y: hidden;
+}
+.outN {
+  outline: none;
+}
+.peN {
+  pointer-events: none;
+}
+.peA {
+  pointer-events: all;
+}
+.pA {
+  position: absolute;
+}
+.pF {
+  position: fixed;
+}
+.pR {
+  position: relative;
+}
+.pS {
+  position: static;
+}
+.r0 {
+  right: 0;
+}
+.t0 {
+  top: 0;
+}
+.l0 {
+  left: 0;
+}
+.b0 {
+  bottom: 0;
+}
+.taC {
+  text-align: center;
+}
+.taL {
+  text-align: left;
+}
+.taR {
+  text-align: right;
+}
+.tdN {
+  text-decoration: none;
+}
+.ttC {
+  text-transform: capitalize;
+}
+.ttU {
+  text-transform: uppercase;
+}
+.vaM {
+  vertical-align: middle;
+}
+
+.vH {
+  visibility: hidden;
+}
+.w100 {
+  width: -moz-available;
+  width: -webkit-fill-available;
+  width: 100%;
+  width: stretch;
+}
+.wI {
+  width: inherit;
+}
+.wsN {
+  white-space: nowrap;
+}
+.wsNor {
+  white-space: normal;
+}
+.wosT {
+  -webkit-overflow-scrolling: touch;
+}
+.zi0 {
+  z-index: 0;
+}
+.zi1 {
+  z-index: 1;
+}
+.link-text-hidden {
+  position: fixed;
+  left: -999px;
+}
+/*
+    Typography classnames to be used on elements like input/button or already defined elements
+    To be used only if Typography component is not usable
+  */
