@@ -10,6 +10,10 @@ const AnimeData = styled.div`
   grid-column-gap: 20px;
   grid-row-gap: 20px;
   padding: 7%;
+  @media only screen and (max-width: 480px) {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    padding: 4%;
+  }
 `;
 
 const Listing = (props) => {
