@@ -16,6 +16,14 @@ const AnimeData = styled.div`
   }
 `;
 
+const CardDiv = styled(Card)`
+  min-height: 250px;
+  aspect-ratio: 1/1;
+  @media only screen and (max-width: 480px) {
+    min-height: 180px;
+  }
+`;
+
 const Listing = (props) => {
   const { animeData, pageType } = props;
 
@@ -24,11 +32,7 @@ const Listing = (props) => {
       {animeData &&
         animeData.map((data, index) => {
           return (
-            <Card
-              className="cP"
-              key={index}
-              sx={{ minHeight: "250px", maxWidth: 250 }}
-            >
+            <CardDiv className="cP" key={index}>
               <CardCover>
                 <img
                   src={
@@ -65,7 +69,7 @@ const Listing = (props) => {
                     : data.title_japanese}
                 </Typography>
               </CardContent>
-            </Card>
+            </CardDiv>
           );
         })}
     </AnimeData>
