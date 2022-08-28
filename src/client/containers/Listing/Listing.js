@@ -27,12 +27,27 @@ const CardDiv = styled(Card)`
 const Listing = (props) => {
   const { animeData, pageType } = props;
 
+  const handleCardClick = (data) => {
+    let query = `?pageType=vap&id=${data.mal_id}`;
+    window.location.href = `/${
+      pageType === "characters"
+        ? "character"
+        : pageType === "manga"
+        ? "manga"
+        : "title"
+    }${query}`;
+  };
+
   return (
     <AnimeData className="dG w100">
       {animeData &&
         animeData.map((data, index) => {
           return (
-            <CardDiv className="cP" key={index}>
+            <CardDiv
+              className="cP"
+              key={index}
+              onClick={() => handleCardClick(data)}
+            >
               <CardCover>
                 <img
                   src={

@@ -20,23 +20,14 @@ const HeaderElements = styled.div`
   padding: 0px 20px;
 `;
 
-const Header = (props) => {
-  const { type, setType } = props;
-
-  useEffect(() => {
-    const url = new URL(window.location);
-    if (url.search === "") {
-      url.searchParams.set("pageType", type);
-      history.pushState({}, "", url);
-    }
-  }, []);
-
+const Header = () => {
   const handleClick = (type) => {
     const url = new URL(window.location);
+    url.pathname = "/";
     url.searchParams.set("pageType", type);
     url.searchParams.delete("q");
-    history.pushState({}, "", url);
-    setType(type);
+    url.searchParams.delete("id");
+    window.location.href = url;
   };
 
   return (

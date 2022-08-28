@@ -144,6 +144,9 @@ button {
 }
 
 /* Common class names to be added below */
+.cW {
+  color: white;
+}
 .Ell {
   overflow: hidden;
   text-overflow: ellipsis;
