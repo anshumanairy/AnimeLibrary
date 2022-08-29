@@ -2,9 +2,16 @@ import React, { useEffect } from "react";
 import styled from "styled-components";
 import { Categories } from "../../constants/common";
 
+const BackgroundWrapper = styled.div`
+  opacity: 0.5;
+  height: 16vh;
+`;
+
 const Wrapper = styled.div`
   @import url("https://fonts.googleapis.com/css?family=Raleway");
   font-family: Raleway;
+  position: absolute;
+  top: 0px;
   border-bottom: 1px solid white;
   width: 100%;
   padding: 2.5% 0px;
@@ -39,21 +46,24 @@ const Header = () => {
   }, []);
 
   return (
-    <Wrapper className="dFA jcFE">
-      <HeaderItems className="dF">
-        {Categories.map((category, index) => {
-          return (
-            <HeaderElements
-              className="cP"
-              key={index}
-              onClick={() => handleClick(category.key)}
-            >
-              {category.value}
-            </HeaderElements>
-          );
-        })}
-      </HeaderItems>
-    </Wrapper>
+    <>
+      <BackgroundWrapper />
+      <Wrapper className="dFA jcFE">
+        <HeaderItems className="dF">
+          {Categories.map((category, index) => {
+            return (
+              <HeaderElements
+                className="cP"
+                key={index}
+                onClick={() => handleClick(category.key)}
+              >
+                {category.value}
+              </HeaderElements>
+            );
+          })}
+        </HeaderItems>
+      </Wrapper>
+    </>
   );
 };
 
