@@ -24,8 +24,19 @@ const StyledInputBase = styled(InputBase)`
   padding: 10px 20px;
 `;
 
+const SeeMoreDiv = styled.button`
+  color: white;
+  border: 1px solid white;
+  padding: 13px 20px;
+  border-radius: 25px;
+  width: 30%;
+  text-align: center;
+  background: none;
+`;
+
 const Home = () => {
   let url = new URL(window.location);
+  let search = getUrlSearchParams(url.search);
 
   const [animeData, setAnimeData] = useState();
   const [queries, setQueries] = useState({});
@@ -39,15 +50,26 @@ const Home = () => {
 
   const handleData = async () => {
     let finalQuery = "";
-    Object.keys(queries).map((query) => {
+    Object.keys(queries).map((query, index) => {
       if (query !== "pageType") {
-        finalQuery += `${QueryTypesMapping[query]}=${queries[query]}`;
+        finalQuery += `${index > 0 ? "&" : ""}${QueryTypesMapping[query]}=${
+          queries[query]
+        }`;
         url.searchParams.set(QueryTypesMapping[query], queries[query]);
       }
     });
-    history.pushState({}, "", url);
+
     let allAnimeData = await getSearchData(finalQuery);
-    setAnimeData(allAnimeData.data);
+
+    setAnimeData(
+      search.page &&
+        queries["page"] &&
+        parseInt(search.page) !== parseInt(queries["page"])
+        ? { ...allAnimeData, data: [...animeData.data, ...allAnimeData.data] }
+        : { ...allAnimeData }
+    );
+
+    history.pushState({}, "", url);
   };
 
   const handleSearch = (event) => {
@@ -55,6 +77,7 @@ const Home = () => {
       setQueries({
         ...queries,
         search: event.target.value,
+        page: 1,
       });
     }
   };
@@ -66,7 +89,6 @@ const Home = () => {
   }, [queries]);
 
   useEffect(() => {
-    let search = getUrlSearchParams(url.search);
     let finalQueryObject = {};
     Object.keys(search).map((key) => {
       let finalKey = Object.keys(QueryTypesMapping).find(
@@ -75,6 +97,7 @@ const Home = () => {
       let finalValue = search[key];
       finalQueryObject[finalKey] = finalValue;
     });
+    finalQueryObject["page"] = search["page"] || 1;
     setQueries({ ...finalQueryObject });
   }, []);
 
@@ -87,7 +110,21 @@ const Home = () => {
           placeholder={"Search"}
         />
       </Search>
-      <ListingPage animeData={animeData} pageType={queries.pageType} />
+      {animeData?.data && (
+        <ListingPage animeData={animeData.data} pageType={queries.pageType} />
+      )}
+      {animeData?.pagination?.has_next_page && (
+        <SeeMoreDiv
+          onClick={() =>
+            setQueries({
+              ...queries,
+              page: parseInt(queries.page) + 1,
+            })
+          }
+        >
+          See More
+        </SeeMoreDiv>
+      )}
     </Wrapper>
   );
 };

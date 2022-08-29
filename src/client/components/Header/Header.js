@@ -32,6 +32,7 @@ const Header = () => {
     const url = new URL(window.location);
     url.pathname = "/";
     url.searchParams.set("pageType", type);
+    url.searchParams.delete("page", 1);
     url.searchParams.delete("q");
     url.searchParams.delete("id");
     window.location.href = url;

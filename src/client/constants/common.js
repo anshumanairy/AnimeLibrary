@@ -16,4 +16,5 @@ export const Categories = [
 export const QueryTypesMapping = {
   pageType: "pageType",
   search: "q",
+  page: "page",
 };

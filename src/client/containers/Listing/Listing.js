@@ -39,55 +39,57 @@ const Listing = (props) => {
   };
 
   return (
-    <AnimeData className="dG w100">
-      {animeData &&
-        animeData.map((data, index) => {
-          return (
-            <CardDiv
-              className="cP"
-              key={index}
-              onClick={() => handleCardClick(data)}
-            >
-              <CardCover>
-                <img
-                  src={
-                    pageType === "characters"
-                      ? data.images.jpg.image_url
-                      : data.images.jpg.large_image_url
-                  }
-                  alt=""
+    <>
+      <AnimeData className="dG w100">
+        {animeData &&
+          animeData.map((data, index) => {
+            return (
+              <CardDiv
+                className="cP"
+                key={index}
+                onClick={() => handleCardClick(data)}
+              >
+                <CardCover>
+                  <img
+                    src={
+                      pageType === "characters"
+                        ? data.images.jpg.image_url
+                        : data.images.jpg.large_image_url
+                    }
+                    alt=""
+                  />
+                </CardCover>
+                <CardCover
+                  sx={{
+                    background:
+                      "linear-gradient(to top, rgba(0,0,0,0.4), rgba(0,0,0,0) 200px), linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0) 300px)",
+                  }}
                 />
-              </CardCover>
-              <CardCover
-                sx={{
-                  background:
-                    "linear-gradient(to top, rgba(0,0,0,0.4), rgba(0,0,0,0) 200px), linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0) 300px)",
-                }}
-              />
-              <CardContent sx={{ justifyContent: "flex-end" }}>
-                <Typography
-                  className="wsN Ell"
-                  level="h2"
-                  fontSize="1rem"
-                  textColor="#fff"
-                  mb={1}
-                >
-                  {pageType === "characters" ? data.name : data.title}
-                </Typography>
-                <Typography
-                  className="wsN Ell"
-                  textColor="neutral.300"
-                  fontSize="0.8rem"
-                >
-                  {pageType === "characters"
-                    ? data.name_kanji
-                    : data.title_japanese}
-                </Typography>
-              </CardContent>
-            </CardDiv>
-          );
-        })}
-    </AnimeData>
+                <CardContent sx={{ justifyContent: "flex-end" }}>
+                  <Typography
+                    className="wsN Ell"
+                    level="h2"
+                    fontSize="1rem"
+                    textColor="#fff"
+                    mb={1}
+                  >
+                    {pageType === "characters" ? data.name : data.title}
+                  </Typography>
+                  <Typography
+                    className="wsN Ell"
+                    textColor="neutral.300"
+                    fontSize="0.8rem"
+                  >
+                    {pageType === "characters"
+                      ? data.name_kanji
+                      : data.title_japanese}
+                  </Typography>
+                </CardContent>
+              </CardDiv>
+            );
+          })}
+      </AnimeData>
+    </>
   );
 };
 
