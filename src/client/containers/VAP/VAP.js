@@ -27,7 +27,7 @@ const Wrapper = styled.div`
 `;
 
 const DetailsWrapper = styled.div`
-  height: 350px;
+  height: 25vw;
   display: flex;
   margin: 2% 0% 0%;
   @media only screen and (max-width: 480px) {
