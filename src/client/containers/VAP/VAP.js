@@ -51,6 +51,13 @@ const DescriptionDiv = styled.div`
   margin: 4% 0% 0%;
 `;
 
+const Genre = styled(Typography)`
+  border: 1px solid white;
+  padding: 5px 15px;
+  border-radius: 20px;
+  margin-right: 10px !important;
+`;
+
 const VAP = () => {
   const [animeData, setAnimeData] = useState();
   const [queries, setQueries] = useState({});
@@ -98,7 +105,11 @@ const VAP = () => {
                 <Typography>Total Episodes: {animeData.episodes}</Typography>
                 <div className="dF">
                   {animeData.genres.map((genre, index) => {
-                    return <div key={index}>{genre.name}</div>;
+                    return (
+                      <Genre className="cP" key={index}>
+                        {genre.name}
+                      </Genre>
+                    );
                   })}
                 </div>
               </DetailsDiv>
