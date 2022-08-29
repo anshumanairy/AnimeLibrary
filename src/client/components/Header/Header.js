@@ -30,6 +30,14 @@ const Header = () => {
     window.location.href = url;
   };
 
+  useEffect(() => {
+    const url = new URL(window.location);
+    if (url.search === "") {
+      url.searchParams.set("pageType", "anime");
+      history.pushState({}, "", url);
+    }
+  }, []);
+
   return (
     <Wrapper className="dFA jcFE">
       <HeaderItems className="dF">
