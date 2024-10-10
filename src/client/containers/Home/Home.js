@@ -13,10 +13,14 @@ const Home = () => {
   const getSearchData = async (currentPage) => {
     setLoading(true);
     try {
-      let data = await fetch(
+      let response = await fetch(
         `https://api.jikan.moe/v4/${type}?page=${currentPage}&limit=24`
       );
-      return await data.json();
+      let data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      return { data: [] };
     } finally {
       setLoading(false);
     }
@@ -26,7 +30,7 @@ const Home = () => {
     setAnimeData([]);
     setPage(1);
     getSearchData(1).then((allAnimeData) => {
-      setAnimeData(allAnimeData.data);
+      setAnimeData(allAnimeData.data || []);
     });
   }, [type]);
 
@@ -35,7 +39,7 @@ const Home = () => {
       const nextPage = page + 1;
       setPage(nextPage);
       getSearchData(nextPage).then((allAnimeData) => {
-        setAnimeData((prevData) => [...prevData, ...allAnimeData.data]);
+        setAnimeData((prevData) => [...prevData, ...(allAnimeData.data || [])]);
       });
     }
   }, [loading, page, type]);
