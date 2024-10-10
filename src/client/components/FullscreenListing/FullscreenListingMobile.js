@@ -7,7 +7,7 @@ const FullscreenListingMobile = ({ animeData, pageType, loading, onLoadMore }) =
   const [visibleItems, setVisibleItems] = useState(8);
 
   const handleItemClick = (item) => {
-    const type = pageType === "characters" ? "character" : pageType;
+    const type = pageType === "characters" ? "characters" : pageType;
     navigate(`/${type}/${item.mal_id}`);
   };
 

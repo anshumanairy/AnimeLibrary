@@ -1,60 +1,130 @@
-import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import Loader from "../../components/Loader/Loader";
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  MANGA_FIELDS,
+  ANIME_FIELDS,
+  CHARACTER_FIELDS,
+} from "../../constants/vapFields";
 
-const VAPDesktop = () => {
-  const [data, setData] = useState();
-  const [loading, setLoading] = useState(true);
-  const { type, id } = useParams();
+const VAPDesktop = ({ data, type }) => {
+  const navigate = useNavigate();
 
-  console.log("VAP params:", { type, id });
+  if (!data) return null;
 
-  const getSearchData = async () => {
-    setLoading(true);
-    try {
-      let response = await fetch(`https://api.jikan.moe/v4/${type}/${id}/full`);
-      return await response.json();
-    } finally {
-      setLoading(false);
+  const fields =
+    type === "characters"
+      ? CHARACTER_FIELDS
+      : type === "anime"
+      ? ANIME_FIELDS
+      : MANGA_FIELDS;
+
+  const renderField = (field) => {
+    if (!data.hasOwnProperty(field)) return null;
+    if (field === "images") return null; // Skip rendering images field separately
+
+    switch (field) {
+      case "trailer":
+        return data.trailer?.embed_url ? (
+          <div className="mb-6">
+            <h3 className="text-2xl font-bold mb-4">Trailer</h3>
+            <iframe
+              width="560"
+              height="315"
+              src={data.trailer.embed_url}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
+          </div>
+        ) : null;
+      case "genres":
+      case "themes":
+      case "demographics":
+        return data[field] && data[field].length > 0 ? (
+          <div className="mb-4">
+            <h3 className="text-xl font-bold mb-2">
+              {field.charAt(0).toUpperCase() + field.slice(1)}
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {data[field].map((item, index) => (
+                <span
+                  key={index}
+                  className="px-2 py-1 bg-gray-700 rounded-full text-sm"
+                >
+                  {item.name}
+                </span>
+              ))}
+            </div>
+          </div>
+        ) : null;
+      case "relations":
+        return data[field] && data[field].length > 0 ? (
+          <div className="mb-6">
+            <h3 className="text-2xl font-bold mb-4">
+              Related {type.charAt(0).toUpperCase() + type.slice(1)}
+            </h3>
+            {data[field].map((relation, index) => (
+              <div key={index} className="mb-2">
+                <h4 className="font-bold">{relation.relation}</h4>
+                {relation.entry.map((entry, entryIndex) => (
+                  <a
+                    key={entryIndex}
+                    href={entry.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-400 hover:text-blue-300 block"
+                  >
+                    {entry.name}
+                  </a>
+                ))}
+              </div>
+            ))}
+          </div>
+        ) : null;
+      default:
+        return data[field] ? (
+          <div className="mb-4">
+            <h3 className="text-xl font-bold mb-2">
+              {field.replace("_", " ").charAt(0).toUpperCase() +
+                field.replace("_", " ").slice(1)}
+            </h3>
+            <p>
+              {typeof data[field] === "object"
+                ? JSON.stringify(data[field])
+                : data[field]}
+            </p>
+          </div>
+        ) : null;
     }
   };
 
-  useEffect(() => {
-    getSearchData().then((result) => {
-      console.log("API response:", result);
-      setData(result.data);
-    });
-  }, [type, id]);
-
-  if (loading) return <Loader />;
-  if (!data) return null;
-
-  const isCharacter = type === "character";
+  const imageUrl = data.images?.webp?.image_url || data.images?.jpg?.image_url;
 
   return (
-    <div className="min-h-screen bg-cover bg-center" style={{backgroundImage: `linear-gradient(to bottom, rgba(20,20,20,0.5), rgba(20,20,20,1)), url(${isCharacter ? data.images.jpg.image_url : data.images.jpg.large_image_url})`}}>
-      <div className="container mx-auto px-4 pt-20 text-white">
-        <h1 className="text-4xl font-bold mb-2">{isCharacter ? data.name : data.title}</h1>
-        <h2 className="text-2xl mb-4">{isCharacter ? data.name_kanji : data.title_japanese}</h2>
-        {!isCharacter && data.genres && (
-          <div className="flex flex-wrap gap-2 mb-4">
-            {data.genres.map((genre, index) => (
-              <span key={index} className="px-2 py-1 bg-red-500 rounded-full text-sm">{genre.name}</span>
-            ))}
-          </div>
-        )}
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white p-8 pt-24">
+      {" "}
+      {/* Added pt-24 for top padding */}
+      <div className="max-w-[88vw] mx-auto">
         <div className="flex flex-col md:flex-row gap-8">
-          <img src={isCharacter ? data.images.jpg.image_url : data.images.jpg.large_image_url} alt={isCharacter ? data.name : data.title} className="w-64 h-auto rounded-lg shadow-lg" />
-          <div>
-            <p className="mb-4">{isCharacter ? data.about : data.synopsis}</p>
-            {!isCharacter && (
-              <p className="mb-4">Rating: {data.score} | Episodes: {data.episodes} | Aired: {data.aired?.string}</p>
-            )}
-            {!isCharacter && data?.trailer?.embed_url && (
-              <a href={data.trailer.embed_url} target="_blank" rel="noopener noreferrer" className="inline-block bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors duration-300">
-                Watch Trailer
-              </a>
-            )}
+          {imageUrl && (
+            <div className="md:w-1/3">
+              <img
+                src={imageUrl}
+                alt={data.title || data.name}
+                className="w-full rounded-lg shadow-2xl mb-6"
+              />
+            </div>
+          )}
+          <div className={`${imageUrl ? "md:w-2/3" : "w-full"}`}>
+            <h1 className="text-4xl lg:text-6xl font-bold mb-6">
+              {data.title || data.name}
+            </h1>
+            <div
+              className="grid grid-cols-1 gap-8"
+              style={{ overflowWrap: "break-word" }}
+            >
+              {fields.map((field) => renderField(field))}
+            </div>
           </div>
         </div>
       </div>

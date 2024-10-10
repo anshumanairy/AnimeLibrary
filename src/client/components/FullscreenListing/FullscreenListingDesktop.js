@@ -149,7 +149,7 @@ const FullscreenListingDesktop = ({
   }, [resetAutoScroll]);
 
   const handleViewClick = () => {
-    const type = pageType === "characters" ? "character" : pageType;
+    const type = pageType === "characters" ? "characters" : pageType;
     navigate(`/${type}/${selectedId}`);
   };
 

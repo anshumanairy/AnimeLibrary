@@ -1,66 +1,124 @@
-import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import Loader from "../../components/Loader/Loader";
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  MANGA_FIELDS,
+  ANIME_FIELDS,
+  CHARACTER_FIELDS,
+} from "../../constants/vapFields";
 
-const VAPMobile = () => {
-  const [data, setData] = useState();
-  const [loading, setLoading] = useState(true);
-  const { type, id } = useParams();
+const VAPMobile = ({ data, type }) => {
+  const navigate = useNavigate();
 
-  console.log("VAP params:", { type, id });
+  if (!data) return null;
 
-  const getSearchData = async () => {
-    setLoading(true);
-    try {
-      let response = await fetch(`https://api.jikan.moe/v4/${type}/${id}/full`);
-      return await response.json();
-    } finally {
-      setLoading(false);
+  const fields =
+    type === "characters"
+      ? CHARACTER_FIELDS
+      : type === "anime"
+      ? ANIME_FIELDS
+      : MANGA_FIELDS;
+
+  const renderField = (field) => {
+    if (!data.hasOwnProperty(field)) return null;
+    if (field === "images") return null; // Skip rendering images field separately
+
+    switch (field) {
+      case "trailer":
+        return data.trailer?.embed_url ? (
+          <div className="mb-6">
+            <h3 className="text-xl font-bold mb-2">Trailer</h3>
+            <div className="aspect-w-16 aspect-h-9">
+              <iframe
+                src={data.trailer.embed_url}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full"
+              ></iframe>
+            </div>
+          </div>
+        ) : null;
+      case "genres":
+      case "themes":
+      case "demographics":
+        return data[field] && data[field].length > 0 ? (
+          <div className="mb-4">
+            <h3 className="text-lg font-bold mb-2">
+              {field.charAt(0).toUpperCase() + field.slice(1)}
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {data[field].map((item, index) => (
+                <span
+                  key={index}
+                  className="px-2 py-1 bg-gray-700 rounded-full text-xs"
+                >
+                  {item.name}
+                </span>
+              ))}
+            </div>
+          </div>
+        ) : null;
+      case "relations":
+        return data[field] && data[field].length > 0 ? (
+          <div className="mb-6">
+            <h3 className="text-lg font-bold mb-2">
+              Related {type.charAt(0).toUpperCase() + type.slice(1)}
+            </h3>
+            {data[field].map((relation, index) => (
+              <div key={index} className="mb-2">
+                <h4 className="font-bold text-sm">{relation.relation}</h4>
+                {relation.entry.map((entry, entryIndex) => (
+                  <a
+                    key={entryIndex}
+                    href={entry.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-400 hover:text-blue-300 block text-sm"
+                  >
+                    {entry.name}
+                  </a>
+                ))}
+              </div>
+            ))}
+          </div>
+        ) : null;
+      default:
+        return data[field] ? (
+          <div className="mb-4">
+            <h3 className="text-lg font-bold mb-2">
+              {field.replace("_", " ").charAt(0).toUpperCase() +
+                field.replace("_", " ").slice(1)}
+            </h3>
+            <p className="text-sm">
+              {typeof data[field] === "object"
+                ? JSON.stringify(data[field])
+                : data[field]}
+            </p>
+          </div>
+        ) : null;
     }
   };
 
-  useEffect(() => {
-    getSearchData().then((result) => {
-      console.log("API response:", result);
-      setData(result.data);
-    });
-  }, [type, id]);
-
-  if (loading) return <Loader />;
-  if (!data) return null;
-
-  const isCharacter = type === "character";
+  const imageUrl = data.images?.webp?.image_url || data.images?.jpg?.image_url;
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-4 pt-16">
-      <img
-        src={isCharacter ? data.images.jpg.image_url : data.images.jpg.large_image_url}
-        alt={isCharacter ? data.name : data.title}
-        className="w-full h-64 object-cover rounded-lg mb-4"
-      />
-      <h1 className="text-2xl font-bold mb-2">{isCharacter ? data.name : data.title}</h1>
-      <h2 className="text-xl mb-4">{isCharacter ? data.name_kanji : data.title_japanese}</h2>
-      {!isCharacter && data.genres && (
-        <div className="flex flex-wrap gap-2 mb-4">
-          {data.genres.map((genre, index) => (
-            <span key={index} className="px-2 py-1 bg-red-500 rounded-full text-sm">{genre.name}</span>
-          ))}
-        </div>
-      )}
-      <p className="mb-4">{isCharacter ? data.about : data.synopsis}</p>
-      {!isCharacter && (
-        <p className="mb-4">Rating: {data.score} | Episodes: {data.episodes} | Aired: {data.aired?.string}</p>
-      )}
-      {!isCharacter && data?.trailer?.embed_url && (
-        <a
-          href={data.trailer.embed_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-block bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors duration-300"
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white p-4 pt-20">
+      <div className="max-w-lg mx-auto">
+        {imageUrl && (
+          <img
+            src={imageUrl}
+            alt={data.title || data.name}
+            className="w-full rounded-lg shadow-2xl mb-6"
+          />
+        )}
+        <h1 className="text-3xl font-bold mb-4">{data.title || data.name}</h1>
+        <div
+          className="space-y-6 max-w-[96vw]"
+          style={{ overflowWrap: "break-word" }}
         >
-          Watch Trailer
-        </a>
-      )}
+          {fields.map((field) => renderField(field))}
+        </div>
+      </div>
     </div>
   );
 };

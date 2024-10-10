@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Categories } from "../../constants/common";
 
@@ -12,8 +12,20 @@ const HeaderMobile = () => {
     setMenuOpen(false);
   };
 
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.classList.add('menu-open');
+    } else {
+      document.body.classList.remove('menu-open');
+    }
+
+    return () => {
+      document.body.classList.remove('menu-open');
+    };
+  }, [menuOpen]);
+
   return (
-    <header className="fixed top-0 left-0 right-0 bg-black z-50">
+    <header className="fixed top-0 left-0 right-0 bg-black z-50 max-w-[100vw]">
       <div className="flex justify-between items-center p-4">
         <h1
           onClick={() => handleClick("anime")}
@@ -23,13 +35,13 @@ const HeaderMobile = () => {
         </h1>
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="text-white"
+          className="text-white z-50 relative"
         >
           {menuOpen ? "Close" : "Menu"}
         </button>
       </div>
       {menuOpen && (
-        <nav className="bg-black p-4">
+        <nav className="fixed top-0 left-0 right-0 bottom-0 bg-black p-4 pt-16 z-40">
           {Categories.map((category, index) => (
             <button
               key={index}
