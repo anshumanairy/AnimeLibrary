@@ -57,49 +57,19 @@ const FullscreenListingDesktop = ({ animeData, pageType, loading, onLoadMore }) 
     }
   }, [animeData, pageType]);
 
-  useEffect(() => {
-    if (tilesRef.current) {
-      tilesRef.current.scrollLeft = 0;
+  const autoScrollToNextTile = useCallback(() => {
+    if (animeData.length > 0) {
+      const nextIndex = (currentIndex + 1) % animeData.length;
+      handleImageClick(animeData[nextIndex], nextIndex);
     }
-  }, []);
-
-  const handleScroll = useCallback(() => {
-    if (tilesRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = tilesRef.current;
-      if (scrollWidth - (scrollLeft + clientWidth) < clientWidth * 0.2) {
-        onLoadMore();
-      }
-    }
-    resetAutoScroll();
-  }, [onLoadMore]);
-
-  useEffect(() => {
-    const tilesElement = tilesRef.current;
-    if (tilesElement) {
-      tilesElement.addEventListener('scroll', handleScroll);
-    }
-
-    return () => {
-      if (tilesElement) {
-        tilesElement.removeEventListener('scroll', handleScroll);
-      }
-    };
-  }, [handleScroll]);
+  }, [animeData, currentIndex]);
 
   const resetAutoScroll = useCallback(() => {
     if (autoScrollIntervalRef.current) {
       clearInterval(autoScrollIntervalRef.current);
     }
-    autoScrollIntervalRef.current = setInterval(autoScrollToNextTile, 10000);
-  }, []);
-
-  const autoScrollToNextTile = useCallback(() => {
-    setCurrentIndex((prevIndex) => {
-      const nextIndex = (prevIndex + 1) % animeData.length;
-      handleImageClick(animeData[nextIndex], nextIndex);
-      return nextIndex;
-    });
-  }, [animeData]);
+    autoScrollIntervalRef.current = setInterval(autoScrollToNextTile, 5000);
+  }, [autoScrollToNextTile]);
 
   const handleImageClick = useCallback((data, index) => {
     const newBackgroundImage = pageType === "characters"
@@ -119,14 +89,30 @@ const FullscreenListingDesktop = ({ animeData, pageType, loading, onLoadMore }) 
         behavior: "smooth",
       });
     }
+  }, [pageType]);
 
+  const handleScroll = useCallback(() => {
+    if (tilesRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = tilesRef.current;
+      if (scrollWidth - (scrollLeft + clientWidth) < clientWidth * 0.2) {
+        onLoadMore();
+      }
+    }
     resetAutoScroll();
-  }, [pageType, resetAutoScroll]);
+  }, [onLoadMore, resetAutoScroll]);
 
-  const handleViewClick = () => {
-    const type = pageType === "characters" ? "character" : pageType;
-    navigate(`/${type}/${selectedId}`);
-  };
+  useEffect(() => {
+    const tilesElement = tilesRef.current;
+    if (tilesElement) {
+      tilesElement.addEventListener('scroll', handleScroll);
+    }
+
+    return () => {
+      if (tilesElement) {
+        tilesElement.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, [handleScroll]);
 
   useEffect(() => {
     resetAutoScroll();
@@ -136,6 +122,11 @@ const FullscreenListingDesktop = ({ animeData, pageType, loading, onLoadMore }) 
       }
     };
   }, [resetAutoScroll]);
+
+  const handleViewClick = () => {
+    const type = pageType === "characters" ? "character" : pageType;
+    navigate(`/${type}/${selectedId}`);
+  };
 
   return (
     <div className="h-screen w-screen relative overflow-hidden font-sans">
