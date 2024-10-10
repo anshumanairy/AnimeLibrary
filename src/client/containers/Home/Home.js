@@ -1,131 +1,56 @@
-import React, { useState, useEffect } from "react";
-import styled from "styled-components";
-import InputBase from "@mui/material/InputBase";
-import loadable from "@loadable/component";
-import { QueryTypesMapping } from "../../constants/common";
-import { getUrlSearchParams } from "../../helpers/common";
-
-const ListingPage = loadable(() => import("../Listing"));
-
-const Wrapper = styled.div`
-  width: 100vw;
-  padding: 0% 0px 5% 0px;
-`;
-
-const Search = styled.div`
-  position: relative;
-  width: 30%;
-  border-radius: 4px;
-  background-color: lightgray;
-  margin-right: 16px;
-`;
-
-const StyledInputBase = styled(InputBase)`
-  padding: 10px 20px;
-`;
-
-const SeeMoreDiv = styled.button`
-  color: white;
-  border: 1px solid white;
-  padding: 13px 20px;
-  border-radius: 25px;
-  width: 30%;
-  text-align: center;
-  background: none;
-`;
+import React, { useState, useEffect, useCallback } from "react";
+import { useParams } from "react-router-dom";
+import FullscreenListing from "../../components/FullscreenListing/FullscreenListing";
+import PageTransition from "../../components/PageTransition/PageTransition";
 
 const Home = () => {
-  let url = new URL(window.location);
-  let search = getUrlSearchParams(url.search);
+  const { type = "anime" } = useParams();
 
-  const [animeData, setAnimeData] = useState();
-  const [queries, setQueries] = useState({});
+  const [animeData, setAnimeData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
 
-  const getSearchData = async (query) => {
-    let data = await fetch(
-      `https://api.jikan.moe/v4/${queries.pageType}?${query}`
-    );
-    return data.json();
-  };
-
-  const handleData = async () => {
-    let finalQuery = "";
-    Object.keys(queries).map((query, index) => {
-      if (query !== "pageType") {
-        finalQuery += `${index > 0 ? "&" : ""}${QueryTypesMapping[query]}=${
-          queries[query]
-        }`;
-        url.searchParams.set(QueryTypesMapping[query], queries[query]);
-      }
-    });
-
-    let allAnimeData = await getSearchData(finalQuery);
-
-    setAnimeData(
-      search.page &&
-        queries["page"] &&
-        parseInt(search.page) !== parseInt(queries["page"])
-        ? { ...allAnimeData, data: [...animeData.data, ...allAnimeData.data] }
-        : { ...allAnimeData }
-    );
-
-    history.pushState({}, "", url);
-  };
-
-  const handleSearch = (event) => {
-    if (event.key === "Enter") {
-      setQueries({
-        ...queries,
-        search: event.target.value,
-        page: 1,
-      });
+  const getSearchData = async (currentPage) => {
+    setLoading(true);
+    try {
+      let data = await fetch(
+        `https://api.jikan.moe/v4/${type}?page=${currentPage}&limit=24`
+      );
+      return await data.json();
+    } finally {
+      setLoading(false);
     }
   };
-
-  useEffect(async () => {
-    if (queries.pageType) {
-      handleData();
-    }
-  }, [queries]);
 
   useEffect(() => {
-    let finalQueryObject = {};
-    Object.keys(search).map((key) => {
-      let finalKey = Object.keys(QueryTypesMapping).find(
-        (subkey) => QueryTypesMapping[subkey] === key
-      );
-      let finalValue = search[key];
-      finalQueryObject[finalKey] = finalValue;
+    setAnimeData([]);
+    setPage(1);
+    getSearchData(1).then((allAnimeData) => {
+      setAnimeData(allAnimeData.data);
     });
-    finalQueryObject["page"] = search["page"] || 1;
-    setQueries({ ...finalQueryObject });
-  }, []);
+  }, [type]);
+
+  const handleLoadMore = useCallback(() => {
+    if (!loading) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      getSearchData(nextPage).then((allAnimeData) => {
+        setAnimeData((prevData) => [...prevData, ...allAnimeData.data]);
+      });
+    }
+  }, [loading, page, type]);
 
   return (
-    <Wrapper className="dFA jcC fdC">
-      <Search>
-        <StyledInputBase
-          onKeyDown={handleSearch}
-          color="secondary"
-          placeholder={"Search"}
+    <PageTransition loading={loading}>
+      <div className="h-screen w-screen relative">
+        <FullscreenListing
+          animeData={animeData}
+          pageType={type}
+          loading={loading}
+          onLoadMore={handleLoadMore}
         />
-      </Search>
-      {animeData?.data && (
-        <ListingPage animeData={animeData.data} pageType={queries.pageType} />
-      )}
-      {animeData?.pagination?.has_next_page && (
-        <SeeMoreDiv
-          onClick={() =>
-            setQueries({
-              ...queries,
-              page: parseInt(queries.page) + 1,
-            })
-          }
-        >
-          See More
-        </SeeMoreDiv>
-      )}
-    </Wrapper>
+      </div>
+    </PageTransition>
   );
 };
 

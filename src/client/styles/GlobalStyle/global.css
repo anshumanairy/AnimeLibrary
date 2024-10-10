@@ -23,6 +23,7 @@ html {
 html,
 body {
   margin: 0;
+  font-family: 'Gobold', sans-serif;
   font-size: 16px;
   line-height: 1.25;
   color: #333;
@@ -390,3 +391,27 @@ button {
     Typography classnames to be used on elements like input/button or already defined elements
     To be used only if Typography component is not usable
   */
+
+/* Add this at the end of the file */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
+
+/* Add this at the end of the file */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.shimmer {
+  animation: shimmer 2s infinite;
+}

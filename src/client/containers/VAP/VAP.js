@@ -1,136 +1,64 @@
 import React, { useState, useEffect } from "react";
-import styled, { css } from "styled-components";
-import { Typography } from "@mui/material";
-import { getUrlSearchParams } from "../../helpers/common";
-
-const BackgroundWrapper = styled.div`
-  ${({ image }) =>
-    image &&
-    css`
-      height: 100vh;
-      background-image: url(${image});
-      filter: blur(40px);
-      -webkit-filter: blur(40px);
-      background-position: center;
-      background-repeat: no-repeat;
-      background-size: cover;
-    `}
-`;
-
-const Wrapper = styled.div`
-  padding: 20px;
-  margin: 0% 4%;
-  position: absolute;
-  top: 16%;
-  background: #0d0d0db0;
-  border-radius: 7px;
-`;
-
-const DetailsWrapper = styled.div`
-  height: 25vw;
-  display: flex;
-  margin: 2% 0% 0%;
-  @media only screen and (max-width: 480px) {
-    height: auto;
-    flex-wrap: wrap;
-  }
-`;
-
-const DetailsDiv = styled.div`
-  margin-left: 3%;
-`;
-
-const ImageWrapper = styled.div`
-  max-height: 300px;
-  height: 300px;
-  display: flex;
-  margin: 4% 0% 0%;
-`;
-
-const DescriptionDiv = styled.div`
-  margin: 4% 0% 0%;
-`;
-
-const Genre = styled(Typography)`
-  border: 1px solid white;
-  padding: 5px 15px;
-  border-radius: 20px;
-  margin-right: 10px !important;
-`;
+import { useParams } from "react-router-dom";
+import Loader from "../../components/Loader/Loader";
 
 const VAP = () => {
-  const [animeData, setAnimeData] = useState();
-  const [queries, setQueries] = useState({});
+  const [data, setData] = useState();
+  const [loading, setLoading] = useState(true);
+  const { type, id } = useParams();
+
+  console.log("VAP params:", { type, id });
 
   const getSearchData = async () => {
-    let data = await fetch(`https://api.jikan.moe/v4/anime/${queries.id}/full`);
-    return data.json();
+    setLoading(true);
+    try {
+      let response = await fetch(`https://api.jikan.moe/v4/${type}/${id}/full`);
+      return await response.json();
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    let url = new URL(window.location);
-    let params = getUrlSearchParams(url.search);
-    setQueries({
-      category: url.pathname.split(["/"])[1],
-      ...params,
+    getSearchData().then((result) => {
+      console.log("API response:", result);
+      setData(result.data);
     });
-  }, []);
+  }, [type, id]);
 
-  useEffect(async () => {
-    if (queries.category && queries.id) {
-      let allAnimeData = await getSearchData();
-      setAnimeData(allAnimeData.data);
-      console.log(allAnimeData.data);
-    }
-  }, [queries]);
+  if (loading) return <Loader />;
+  if (!data) return null;
+
+  const isCharacter = type === "character";
 
   return (
-    <>
-      {animeData && queries.category === "title" && (
-        <>
-          <BackgroundWrapper image={animeData.images.jpg.large_image_url} />
-          <Wrapper className="cW">
-            <DetailsWrapper>
-              <img src={animeData.images.jpg.large_image_url} />
-              <DetailsDiv>
-                <div className="dF aiB">
-                  <Typography variant="h3">{`${animeData.title}`}</Typography>
-                  <Typography variant="h5">{`(${animeData.year})`}</Typography>
-                </div>
-                <Typography variant="subtitle1">
-                  {animeData.title_japanese}
-                </Typography>
-                <Typography>Rating: {animeData.score}</Typography>
-                <Typography>Airing: {animeData.aired.string}</Typography>
-                <Typography>Total Episodes: {animeData.episodes}</Typography>
-                <div className="dF">
-                  {animeData.genres.map((genre, index) => {
-                    return (
-                      <Genre className="cP" key={index}>
-                        {genre.name}
-                      </Genre>
-                    );
-                  })}
-                </div>
-              </DetailsDiv>
-            </DetailsWrapper>
-            {animeData?.trailer?.embed_url && (
-              <ImageWrapper>
-                <iframe
-                  width="100%"
-                  height="300"
-                  src={`${animeData.trailer.embed_url}&autoplay=1&mute=1`}
-                ></iframe>
-              </ImageWrapper>
+    <div className="min-h-screen bg-cover bg-center" style={{backgroundImage: `linear-gradient(to bottom, rgba(20,20,20,0.5), rgba(20,20,20,1)), url(${isCharacter ? data.images.jpg.image_url : data.images.jpg.large_image_url})`}}>
+      <div className="container mx-auto px-4 pt-20 text-white">
+        <h1 className="text-4xl font-bold mb-2">{isCharacter ? data.name : data.title}</h1>
+        <h2 className="text-2xl mb-4">{isCharacter ? data.name_kanji : data.title_japanese}</h2>
+        {!isCharacter && data.genres && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {data.genres.map((genre, index) => (
+              <span key={index} className="px-2 py-1 bg-red-500 rounded-full text-sm">{genre.name}</span>
+            ))}
+          </div>
+        )}
+        <div className="flex flex-col md:flex-row gap-8">
+          <img src={isCharacter ? data.images.jpg.image_url : data.images.jpg.large_image_url} alt={isCharacter ? data.name : data.title} className="w-64 h-auto rounded-lg shadow-lg" />
+          <div>
+            <p className="mb-4">{isCharacter ? data.about : data.synopsis}</p>
+            {!isCharacter && (
+              <p className="mb-4">Rating: {data.score} | Episodes: {data.episodes} | Aired: {data.aired?.string}</p>
             )}
-            <DescriptionDiv>
-              <Typography>{animeData.background}</Typography>
-              <Typography>{animeData.synopsis}</Typography>
-            </DescriptionDiv>
-          </Wrapper>
-        </>
-      )}
-    </>
+            {!isCharacter && data?.trailer?.embed_url && (
+              <a href={data.trailer.embed_url} target="_blank" rel="noopener noreferrer" className="inline-block bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors duration-300">
+                Watch Trailer
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

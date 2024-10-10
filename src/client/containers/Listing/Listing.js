@@ -1,95 +1,89 @@
 import React from "react";
-import styled from "styled-components";
-import Card from "@mui/joy/Card";
-import CardCover from "@mui/joy/CardCover";
-import CardContent from "@mui/joy/CardContent";
-import Typography from "@mui/joy/Typography";
+import { styled } from "@mui/material/styles";
+import { Grid, Card, CardMedia, CardContent, Typography } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
-const AnimeData = styled.div`
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  grid-column-gap: 20px;
-  grid-row-gap: 20px;
-  padding: 7%;
-  @media only screen and (max-width: 480px) {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    padding: 4%;
-  }
-`;
+const StyledCard = styled(Card)(({ theme }) => ({
+  position: "relative",
+  height: 0,
+  paddingTop: "150%", // 2:3 aspect ratio
+  overflow: "hidden",
+  "&:hover": {
+    "& .MuiCardMedia-root": {
+      transform: "scale(1.1)",
+    },
+    "& .MuiCardContent-root": {
+      opacity: 1,
+    },
+  },
+}));
 
-const CardDiv = styled(Card)`
-  min-height: 250px;
-  aspect-ratio: 1/1;
-  @media only screen and (max-width: 480px) {
-    min-height: 180px;
-  }
-`;
+const CardMediaStyled = styled(CardMedia)({
+  position: "absolute",
+  top: 0,
+  left: 0,
+  width: "100%",
+  height: "100%",
+  transition: "transform 0.3s ease-in-out",
+});
 
-const Listing = (props) => {
-  const { animeData, pageType } = props;
+const CardContentStyled = styled(CardContent)(({ theme }) => ({
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  width: "100%",
+  background: "linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0))",
+  opacity: 0,
+  transition: "opacity 0.3s ease-in-out",
+  padding: theme.spacing(2),
+}));
+
+const Listing = ({ animeData, pageType }) => {
+  const navigate = useNavigate();
 
   const handleCardClick = (data) => {
-    let query = `?pageType=vap&id=${data.mal_id}`;
-    window.location.href = `/${
-      pageType === "characters"
-        ? "character"
-        : pageType === "manga"
-        ? "manga"
-        : "title"
-    }${query}`;
+    const url = `/${pageType}/${data.mal_id}`;
+    console.log("Navigating to:", url); // Add this line
+    navigate(url);
   };
 
   return (
-    <>
-      <AnimeData className="dG w100">
-        {animeData &&
-          animeData.map((data, index) => {
-            return (
-              <CardDiv
-                className="cP"
-                key={index}
-                onClick={() => handleCardClick(data)}
-              >
-                <CardCover>
-                  <img
-                    src={
-                      pageType === "characters"
-                        ? data.images.jpg.image_url
-                        : data.images.jpg.large_image_url
-                    }
-                    alt=""
-                  />
-                </CardCover>
-                <CardCover
-                  sx={{
-                    background:
-                      "linear-gradient(to top, rgba(0,0,0,0.4), rgba(0,0,0,0) 200px), linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0) 300px)",
-                  }}
-                />
-                <CardContent sx={{ justifyContent: "flex-end" }}>
-                  <Typography
-                    className="wsN Ell"
-                    level="h2"
-                    fontSize="1rem"
-                    textColor="#fff"
-                    mb={1}
-                  >
-                    {pageType === "characters" ? data.name : data.title}
-                  </Typography>
-                  <Typography
-                    className="wsN Ell"
-                    textColor="neutral.300"
-                    fontSize="0.8rem"
-                  >
-                    {pageType === "characters"
-                      ? data.name_kanji
-                      : data.title_japanese}
-                  </Typography>
-                </CardContent>
-              </CardDiv>
-            );
-          })}
-      </AnimeData>
-    </>
+    <Grid container spacing={2}>
+      {animeData &&
+        animeData.map((data, index) => (
+          <Grid item xs={6} sm={4} md={3} lg={2} key={index}>
+            <StyledCard onClick={() => handleCardClick(data)}>
+              <CardMediaStyled
+                image={
+                  pageType === "characters"
+                    ? data.images.jpg.image_url
+                    : data.images.jpg.large_image_url
+                }
+                title={pageType === "characters" ? data.name : data.title}
+              />
+              <CardContentStyled>
+                <Typography
+                  variant="subtitle1"
+                  component="div"
+                  noWrap
+                  sx={{ color: "white" }}
+                >
+                  {pageType === "characters" ? data.name : data.title}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ color: "rgba(255,255,255,0.7)" }}
+                  noWrap
+                >
+                  {pageType === "characters"
+                    ? data.name_kanji
+                    : data.title_japanese}
+                </Typography>
+              </CardContentStyled>
+            </StyledCard>
+          </Grid>
+        ))}
+    </Grid>
   );
 };
 

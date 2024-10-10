@@ -1,1 +1,1 @@
-export { default } from "./VAP";
+export { default } from './VAP';
