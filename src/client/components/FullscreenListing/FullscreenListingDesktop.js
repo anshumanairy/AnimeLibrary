@@ -51,6 +51,7 @@ const FullscreenListingDesktop = ({
   onLoadMore,
 }) => {
   const [backgroundImage, setBackgroundImage] = useState("");
+  const [isImageLoading, setIsImageLoading] = useState(true);
   const [selectedTitle, setSelectedTitle] = useState("");
   const [selectedDescription, setSelectedDescription] = useState("");
   const [selectedId, setSelectedId] = useState("");
@@ -59,15 +60,30 @@ const FullscreenListingDesktop = ({
   const tilesRef = useRef(null);
   const bgRef = useRef(null);
   const autoScrollIntervalRef = useRef(null);
+  const isAutoScrollingRef = useRef(false);
+  const previousPageTypeRef = useRef(pageType);
 
   useEffect(() => {
     if (animeData && animeData.length > 0) {
-      const firstItem = animeData[0];
-      setBackgroundImage(
+      let firstItem = {};
+      if (animeData?.length <= 24) {
+        firstItem = animeData[0];
+      } else {
+        firstItem = animeData[currentIndex];
+      }
+      const imageUrl =
         pageType === "characters"
           ? firstItem.images.webp.image_url
-          : firstItem.images.jpg.large_image_url
-      );
+          : firstItem.images.jpg.large_image_url;
+
+      setIsImageLoading(true);
+      const img = new Image();
+      img.src = imageUrl;
+      img.onload = () => {
+        setBackgroundImage(imageUrl);
+        setIsImageLoading(false);
+      };
+
       setSelectedTitle(firstItem.title || firstItem.name);
       setSelectedDescription(
         firstItem.synopsis || firstItem.about || "No description available."
@@ -76,12 +92,50 @@ const FullscreenListingDesktop = ({
     }
   }, [animeData, pageType]);
 
-  const autoScrollToNextTile = useCallback(() => {
-    if (animeData.length > 0) {
-      const nextIndex = (currentIndex + 1) % animeData.length;
-      handleImageClick(animeData[nextIndex], nextIndex);
+  useEffect(() => {
+    if (previousPageTypeRef.current !== pageType) {
+      setCurrentIndex(0);
+      resetAutoScroll();
+      previousPageTypeRef.current = pageType;
     }
-  }, [animeData, currentIndex]);
+  }, [pageType]);
+
+  const autoScrollToNextTile = useCallback(() => {
+    if (animeData.length > 0 && tilesRef.current) {
+      isAutoScrollingRef.current = true;
+      const nextIndex = (currentIndex + 1) % animeData.length;
+
+      const tileWidth = 220 + 24; // Image width (220px) + margin (1.5rem)
+      const newScrollPosition = nextIndex * tileWidth;
+
+      tilesRef.current.scrollTo({
+        left: newScrollPosition,
+        behavior: "smooth",
+      });
+
+      setCurrentIndex(nextIndex);
+      const nextItem = animeData[nextIndex];
+      setSelectedTitle(nextItem.title || nextItem.name);
+      setSelectedDescription(
+        nextItem.synopsis || nextItem.about || "No description available."
+      );
+      setSelectedId(nextItem.mal_id);
+
+      const newBackgroundImage =
+        pageType === "characters"
+          ? nextItem.images.webp.image_url
+          : nextItem.images.jpg.large_image_url;
+      setBackgroundImage(newBackgroundImage);
+
+      if (nextIndex > animeData.length - 5) {
+        onLoadMore();
+      }
+
+      setTimeout(() => {
+        isAutoScrollingRef.current = false;
+      }, 1000);
+    }
+  }, [animeData, currentIndex, pageType, onLoadMore]);
 
   const resetAutoScroll = useCallback(() => {
     if (autoScrollIntervalRef.current) {
@@ -92,12 +146,22 @@ const FullscreenListingDesktop = ({
 
   const handleImageClick = useCallback(
     (data, index) => {
+      if (isAutoScrollingRef.current) return;
+
       const newBackgroundImage =
         pageType === "characters"
           ? data.images.webp.image_url
           : data.images.jpg.large_image_url;
 
       setBackgroundImage(newBackgroundImage);
+      setIsImageLoading(true);
+      const img = new Image();
+      img.src = newBackgroundImage;
+      img.onload = () => {
+        setBackgroundImage(newBackgroundImage);
+        setIsImageLoading(false);
+      };
+
       setSelectedTitle(data.title || data.name);
       setSelectedDescription(
         data.synopsis || data.about || "No description available."
@@ -106,17 +170,20 @@ const FullscreenListingDesktop = ({
       setCurrentIndex(index);
 
       if (tilesRef.current) {
-        const tileWidth = 220 + 24; // Image width (220px) + margin (1.5rem)
+        const tileWidth = 220 + 24;
         tilesRef.current.scrollTo({
           left: index * tileWidth,
           behavior: "smooth",
         });
       }
+      resetAutoScroll();
     },
-    [pageType]
+    [pageType, resetAutoScroll]
   );
 
   const handleScroll = useCallback(() => {
+    if (isAutoScrollingRef.current) return;
+
     if (tilesRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = tilesRef.current;
       if (scrollWidth - (scrollLeft + clientWidth) < clientWidth * 0.2) {
@@ -149,27 +216,34 @@ const FullscreenListingDesktop = ({
   }, [resetAutoScroll]);
 
   const handleViewClick = () => {
-    const type = pageType === "characters" ? "characters" : pageType;
-    navigate(`/${type}/${selectedId}`);
+    navigate(`/${pageType}/${selectedId}`);
   };
 
   return (
     <div className="h-screen w-screen relative overflow-hidden font-sans">
       <div className="absolute inset-0 flex">
+        {/* Placeholder gradient */}
+        <div
+          className="absolute inset-0 bg-gradient-to-br from-gray-900 to-black transition-opacity duration-1000 ease-in-out"
+          style={{ opacity: isImageLoading ? 1 : 0 }}
+        ></div>
+
         {/* Left half - clear background image */}
         <div
           ref={bgRef}
-          className="w-1/2 max-w-[38%] bg-cover bg-center transition-all duration-700 ease-in-out"
+          className="w-1/2 max-w-[38%] bg-cover bg-center transition-all duration-1000 ease-in-out"
           style={{
             backgroundImage: `url(${backgroundImage})`,
+            opacity: isImageLoading ? 0 : 1,
           }}
         />
         {/* Right half - blurred background image */}
         <div
-          className="w-[62%] bg-cover bg-center transition-all duration-700 ease-in-out"
+          className="w-[62%] bg-cover bg-center transition-all duration-1000 ease-in-out"
           style={{
             backgroundImage: `url(${backgroundImage})`,
             filter: "blur(50px)",
+            opacity: isImageLoading ? 0 : 1,
           }}
         />
         {/* Overlay gradient */}
@@ -203,6 +277,7 @@ const FullscreenListingDesktop = ({
                 data={data}
                 pageType={pageType}
                 onClick={() => handleImageClick(data, index)}
+                isSelected={index === currentIndex}
               />
             ))}
             {loading && <LoadingIndicator />}
